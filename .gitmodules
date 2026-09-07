@@ -1,0 +1,18 @@
+[submodule "third_party/MaterialX"]
+	path = third_party/MaterialX
+	url = https://github.com/AcademySoftwareFoundation/MaterialX.git
+[submodule "third_party/OpenEXR"]
+	path = third_party/OpenEXR
+	url = https://github.com/AcademySoftwareFoundation/openexr.git
+[submodule "third_party/KTX-Software"]
+	path = third_party/KTX-Software
+	url = https://github.com/KhronosGroup/KTX-Software.git
+[submodule "third_party/jxrlib"]
+	path = third_party/jxrlib
+	url = https://github.com/4creators/jxrlib.git
+[submodule "third_party/DirectXTex"]
+	path = third_party/DirectXTex
+	url = https://github.com/microsoft/DirectXTex.git
+[submodule "third_party/MDL-SDK"]
+	path = third_party/MDL-SDK
+	url = https://github.com/NVIDIA/MDL-SDK.git
