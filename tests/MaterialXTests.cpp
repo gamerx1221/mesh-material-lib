@@ -1,5 +1,6 @@
 #include "mesh_material/MaterialXAdapter.h"
 #include "mesh_material/MaterialXRuntime.h"
+#include "mesh_material/BuiltinTranslationLayers.h"
 
 #include <cassert>
 
@@ -15,4 +16,12 @@ int main()
     std::vector<std::string> diagnostics;
     const auto runtime = MaterialXRuntimeCompiler().Compile(*material, diagnostics);
     assert(runtime && runtime->document && runtime->pbr.metallic == .6f && runtime->emissive.z == .3f);
+    SubstanceBakedMaterialTranslationLayer substanceLayer;
+    const auto baked = substanceLayer.Import({.format = MaterialFormat::Substance, .sourceIdentifier = "paint",
+        .bakedSource = {.kind = BakedMaterialSourceKind::SubstanceArchive, .sourceUri = "materials/paint.sbsar",
+            .textures = {{BakedTextureSlot::BaseColor, "textures/paint_basecolor.png"}, {BakedTextureSlot::Normal, "textures/paint_normal.png"}}}});
+    const auto validatedBaked = layer.Import({.format = MaterialFormat::MaterialX, .sourceIdentifier = "paint",
+        .payload = std::vector<std::byte>(reinterpret_cast<const std::byte*>(baked.document.xml.data()),
+            reinterpret_cast<const std::byte*>(baked.document.xml.data() + baked.document.xml.size()))});
+    assert(baked.success && validatedBaked.success);
 }

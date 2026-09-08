@@ -19,4 +19,20 @@ int main()
     const auto usd = factory.Import({.format = MaterialFormat::UsdShade, .sourceIdentifier = "usd-paint",
         .parameters = {{"diffuseColor", Float3{.2f, .3f, .4f}}, {"metallic", .7f}, {"roughness", .4f}}});
     assert(usd.success && usd.document.xml.find("base_color") != std::string::npos);
+    assert(factory.RegisterTranslationLayer(std::make_shared<SubstanceBakedMaterialTranslationLayer>()));
+    const BakedMaterialSource bakedSubstance{.kind = BakedMaterialSourceKind::SubstanceArchive, .sourceUri = "materials/paint.sbsar",
+        .textures = {{BakedTextureSlot::BaseColor, "textures/paint_basecolor.png"}, {BakedTextureSlot::Normal, "textures/paint_normal.png"}},
+        .parameters = {{"baseColor", Float4{.2f, .3f, .4f, 1.f}}, {"metallic", .7f}, {"roughness", .4f}}};
+    const auto substance = factory.Import({.format = MaterialFormat::Substance, .sourceIdentifier = "substance-paint", .bakedSource = bakedSubstance});
+    assert(substance.success && substance.document.xml.find("sourcekind=\"substance_archive\"") != std::string::npos);
+    assert(substance.runtimePbr.metallic == .7f && substance.runtimePbr.roughness == .4f);
+    assert(factory.Create(9, substance)->GetRuntimePbr().name == "substance-paint");
+    assert(factory.RegisterTranslationLayer(std::make_shared<MdlMaterialTranslationLayer>()));
+    const auto nativeMdl = factory.Import({.format = MaterialFormat::Mdl, .sourceIdentifier = "native-paint",
+        .bakedSource = {.kind = BakedMaterialSourceKind::MdlModule, .sourceUri = "materials/paint.mdl", .mdlMode = MdlImportMode::Native}});
+    assert(!nativeMdl.success && nativeMdl.diagnostics.front().find("native renderer MDL adapter") != std::string::npos);
+    const auto bakedMdl = factory.Import({.format = MaterialFormat::Mdl, .sourceIdentifier = "mdl-paint",
+        .bakedSource = {.kind = BakedMaterialSourceKind::MdlModule, .sourceUri = "materials/paint.mdl", .mdlMode = MdlImportMode::BakedDistilled,
+            .textures = bakedSubstance.textures, .parameters = bakedSubstance.parameters}});
+    assert(bakedMdl.success && bakedMdl.document.xml.find("mdlmode=\"baked_distilled\"") != std::string::npos);
 }

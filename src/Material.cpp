@@ -33,6 +33,11 @@ namespace mesh_material
         runtimePbr.id = id;
         return std::make_shared<Material>(id, std::move(document), std::move(runtimePbr));
     }
+    std::shared_ptr<IMaterial> MaterialFactory::Create(AssetId id, const MaterialTranslationResult& imported) const
+    {
+        if (!imported.success) return {};
+        return Create(id, imported.document, imported.runtimePbr);
+    }
     MaterialTranslationResult MaterialFactory::Import(const MaterialTranslationRequest& request) const
     {
         const auto layer = std::ranges::find_if(m_layers, [&request](const auto& candidate) { return candidate->GetFormat() == request.format; });

@@ -38,6 +38,47 @@ namespace mesh_material
         ParameterValue value;
     };
 
+    /// Portable origin information for a material that has already been baked to PBR textures.
+    /// Texture URIs are intentionally renderer-owned; this library neither loads textures nor requires
+    /// a Substance or MDL SDK.
+    enum class BakedMaterialSourceKind : std::uint8_t
+    {
+        SubstanceArchive,
+        MdlModule
+    };
+
+    enum class MdlImportMode : std::uint8_t
+    {
+        Native,
+        BakedDistilled
+    };
+
+    enum class BakedTextureSlot : std::uint8_t
+    {
+        BaseColor,
+        Normal,
+        Metallic,
+        Roughness,
+        Occlusion,
+        Emission,
+        Opacity
+    };
+
+    struct BakedTexture
+    {
+        BakedTextureSlot slot{};
+        std::string uri;
+    };
+
+    struct BakedMaterialSource
+    {
+        BakedMaterialSourceKind kind{BakedMaterialSourceKind::SubstanceArchive};
+        std::string sourceUri;
+        MdlImportMode mdlMode{MdlImportMode::BakedDistilled};
+        std::vector<BakedTexture> textures;
+        std::vector<Parameter> parameters;
+    };
+
     struct MaterialXDocument
     {
         std::string xml;
@@ -56,12 +97,14 @@ namespace mesh_material
         std::string sourceIdentifier;
         std::vector<std::byte> payload;
         std::vector<Parameter> parameters;
+        BakedMaterialSource bakedSource;
     };
 
     struct MaterialTranslationResult
     {
         bool success{};
         MaterialXDocument document;
+        PbrMaterialData runtimePbr;
         std::vector<std::string> diagnostics;
     };
 
@@ -91,6 +134,7 @@ namespace mesh_material
         virtual bool RegisterTranslationLayer(std::shared_ptr<IMaterialTranslationLayer> layer) = 0;
         [[nodiscard]] virtual std::shared_ptr<IMaterial> Create(AssetId id, MaterialXDocument document,
             PbrMaterialData runtimePbr = {}) const = 0;
+        [[nodiscard]] virtual std::shared_ptr<IMaterial> Create(AssetId id, const MaterialTranslationResult& imported) const = 0;
         [[nodiscard]] virtual MaterialTranslationResult Import(const MaterialTranslationRequest& request) const = 0;
         [[nodiscard]] virtual bool Export(MaterialFormat format, const MaterialXDocument& document,
             MaterialTranslationRequest& request, std::vector<std::string>& diagnostics) const = 0;
@@ -102,6 +146,7 @@ namespace mesh_material
         bool RegisterTranslationLayer(std::shared_ptr<IMaterialTranslationLayer> layer) override;
         [[nodiscard]] std::shared_ptr<IMaterial> Create(AssetId id, MaterialXDocument document,
             PbrMaterialData runtimePbr = {}) const override;
+        [[nodiscard]] std::shared_ptr<IMaterial> Create(AssetId id, const MaterialTranslationResult& imported) const override;
         [[nodiscard]] MaterialTranslationResult Import(const MaterialTranslationRequest& request) const override;
         [[nodiscard]] bool Export(MaterialFormat format, const MaterialXDocument& document,
             MaterialTranslationRequest& request, std::vector<std::string>& diagnostics) const override;
