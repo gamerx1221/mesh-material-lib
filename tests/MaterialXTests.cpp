@@ -16,6 +16,9 @@ int main()
     std::vector<std::string> diagnostics;
     const auto runtime = MaterialXRuntimeCompiler().Compile(*material, diagnostics);
     assert(runtime && runtime->document && runtime->pbr.metallic == .6f && runtime->emissive.z == .3f);
+    const PbrTextureReference normal{.sourceUri = "textures/normal.png", .srgb = true};
+    const auto normalRequest = normal.ToTextureRequest(PbrTextureSlot::Normal);
+    assert(normalRequest.Semantic() == TextureSemantic::Normal && normalRequest.ColorSpace() == TextureColorSpace::Linear);
     SubstanceBakedMaterialTranslationLayer substanceLayer;
     const auto baked = substanceLayer.Import({.format = MaterialFormat::Substance, .sourceIdentifier = "paint",
         .bakedSource = {.kind = BakedMaterialSourceKind::SubstanceArchive, .sourceUri = "materials/paint.sbsar",

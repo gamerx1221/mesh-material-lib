@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+void RunTextureTests();
+
 int main()
 {
     using namespace mesh_material;
@@ -35,4 +37,5 @@ int main()
         .bakedSource = {.kind = BakedMaterialSourceKind::MdlModule, .sourceUri = "materials/paint.mdl", .mdlMode = MdlImportMode::BakedDistilled,
             .textures = bakedSubstance.textures, .parameters = bakedSubstance.parameters}});
     assert(bakedMdl.success && bakedMdl.document.xml.find("mdlmode=\"baked_distilled\"") != std::string::npos);
+    RunTextureTests();
 }

@@ -52,6 +52,20 @@ namespace
 }
 namespace mesh_material
 {
+    TextureRequest PbrTextureReference::ToTextureRequest(PbrTextureSlot slot) const
+    {
+        TextureSemantic semantic = TextureSemantic::BaseColor;
+        switch (slot)
+        {
+        case PbrTextureSlot::MetallicRoughness: semantic = TextureSemantic::MetallicRoughness; break;
+        case PbrTextureSlot::Normal: semantic = TextureSemantic::Normal; break;
+        case PbrTextureSlot::Occlusion: semantic = TextureSemantic::Occlusion; break;
+        case PbrTextureSlot::Emissive: semantic = TextureSemantic::Emissive; break;
+        case PbrTextureSlot::BaseColor: break;
+        }
+        const auto colorSpace = slot == PbrTextureSlot::Normal ? TextureColorSpace::Linear : (srgb ? TextureColorSpace::Srgb : TextureColorSpace::Linear);
+        return {TextureUri(sourceUri), semantic, colorSpace, metadata};
+    }
     std::shared_ptr<PbrMaterialRuntime> MaterialXRuntimeCompiler::Compile(const IMaterial& material, std::vector<std::string>& diagnostics) const
     {
         const auto& source = material.GetMaterialX(); if (source.xml.empty()) { diagnostics.push_back("MaterialX document is empty"); return {}; }

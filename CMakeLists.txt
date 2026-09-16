@@ -9,7 +9,8 @@ option(MESH_MATERIAL_ENABLE_KTX "Build KTX texture adapter" OFF)
 
 add_library(mesh_material_core STATIC
     src/Material.cpp
-    src/BuiltinTranslationLayers.cpp)
+    src/BuiltinTranslationLayers.cpp
+    src/Texture.cpp)
 add_library(mesh_material::core ALIAS mesh_material_core)
 
 target_include_directories(mesh_material_core
@@ -43,7 +44,7 @@ endif()
 
 if(MESH_MATERIAL_BUILD_TESTS AND PROJECT_IS_TOP_LEVEL)
     enable_testing()
-    add_executable(mesh_material_core_tests tests/MaterialTests.cpp)
+    add_executable(mesh_material_core_tests tests/MaterialTests.cpp tests/TextureTests.cpp)
     target_link_libraries(mesh_material_core_tests PRIVATE mesh_material::core)
     add_test(NAME mesh_material_core_tests COMMAND mesh_material_core_tests)
     if(TARGET mesh_material_materialx)
